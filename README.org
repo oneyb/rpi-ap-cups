@@ -41,19 +41,19 @@ The following is the debugging stuff I went through to come to my solution.
 #+END_SRC
 
 *** TODO Translate the following into a playbook
-#+BEGIN_SRC shell :session *Shell* :results silent
-  sudo mkdir /opt/airprint
-  cd /opt/airprint
-  sudo git clone https://github.com/tjfontaine/airprint-generate.git
-  sudo ln -sf airprint-generate/airprint-generate.py .
-  sudo python airprint-generate.py -d /etc/avahi/services
-  sudo adduser pi lpadmin
-  sudo systemctl restart cups avahi-daemon
-  sudo systemctl status cups avahi-daemon
-  sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-  sudo iptables -A FORWARD -i eth0 -o $interface -m state --state RELATED,ESTABLISHED -j ACCEPT
-  sudo iptables -A FORWARD -i $interface -o eth0 -j ACCEPT
-  sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
+#+BEGIN_SRC shell :session *Shell* :results silent :var interface="wlan0"
+sudo mkdir /opt/airprint
+cd /opt/airprint
+sudo git clone https://github.com/tjfontaine/airprint-generate.git
+sudo ln -sf airprint-generate/airprint-generate.py .
+sudo python airprint-generate.py -d /etc/avahi/services
+sudo adduser pi lpadmin
+sudo systemctl restart cups avahi-daemon
+sudo systemctl status cups avahi-daemon
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo iptables -A FORWARD -i eth0 -o $interface -m state --state RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -A FORWARD -i $interface -o eth0 -j ACCEPT
+sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
 #+END_SRC
 
 And it just works. Awesome.
@@ -62,16 +62,23 @@ And it just works. Awesome.
 *** backup important stuff
 [[file:backup.yaml]]
 
+#+BEGIN_SRC shell :session *Shell* :dir ~/rpi-ap-ha
+ansible-playbook -i inventory backup.yaml --ask-become-pass
+#+END_SRC
 *** Install important stuff with ansible 
 
 #+NAME: rpi-wifi-yaml
 [[file:install-ap.yaml]]
 
-** TODO make templates
+#+BEGIN_SRC shell :session *Shell* :dir ~/rpi-ap-ha
+ansible-playbook -i inventory install-ap.yaml --ask-become-pass
+#+END_SRC
+* TODO TODO List
+
+** make templates from configured files
 #+BEGIN_SRC shell :dir ~/rpi-ap-ha/ :results raw
 sed -ri 's/192\.168\.42/{{ ipv4address }}/g;s/eth0/{{ br_interface }}/g;s/wlan0/{{ ap_interface }}/g' templates/*
 #+END_SRC
 
-#+RESULTS:
 
 
