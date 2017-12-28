@@ -1,0 +1,79 @@
+---
+- hosts: barry.local
+  become: pi
+  vars:
+    backup_dir: ~/local-rpi-server/backup-config
+  tasks:
+  - name: install necessary packages
+    apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
+    become: yes
+    become_method: sudo
+    with_items:
+      - hostapd
+      - dnsmasq
+      - cups
+      - udhcpd
+      - avahi-daemon
+      - python-cups
+      - python3-dev
+      - libsnmp-dev
+      - snmp
+      - libsane-dev
+      - libcups2-dev
+      - cups-bsd
+      - libtool
+      - libtool-bin
+      - avahi-utils
+      - hplip
+      - avahi-discover
+      - samba
+  - name: install wifi config files
+    copy: src={{ backup_dir }}/{{ item | basename }} dest={{ item }} owner=root mode=0600
+    become: yes
+    become_method: sudo
+    with_items:
+      - /etc/hostapd/hostapd.conf
+      - /etc/default/hostapd
+      - /etc/sysctl.conf
+      - /etc/dnsmasq.conf
+      - /etc/network/interfaces
+      - /etc/dhcpcd.conf
+      - /etc/default/udhcpd
+      - /etc/iptables.ipv4.nat
+      - /etc/cups/cupsd.conf
+  - name: fill and wifi config files
+    template: 
+      src: '{{ backup_dir }}/{{ item | basename }}' 
+      dest: {{ item }} 
+      owner: root 
+      mode: 0600
+      backup: yes
+    become: yes
+    become_method: sudo
+    with_items:
+      - /etc/hostapd/hostapd.conf
+      - /etc/default/hostapd
+      - /etc/sysctl.conf
+      - /etc/dnsmasq.conf
+      - /etc/network/interfaces
+      - /etc/dhcpcd.conf
+      - /etc/default/udhcpd
+      - /etc/iptables.ipv4.nat
+      - /etc/cups/cupsd.conf
+  - name: start necessary services
+    systemd: name={{ item }} state=restarted daemon_reload=yes enabled=yes
+    become: yes
+    become_method: sudo
+    with_items:
+      - udhcpd
+      - hostapd
+      - dnsmasq
+      - avahi-daemon
+      - cups
+      - networking
+  - name: disable necessary/blocking services
+    systemd: name={{ item }} state=stopped enabled=no
+    become: yes
+    become_method: sudo
+    with_items:
+      - NetworkManager

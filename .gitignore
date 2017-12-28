@@ -1,0 +1,8 @@
+2017-09-07-raspbian-stretch-lite.zip
+backup-preinstall/
+access-point.*
+did-not-work/
+*.retry
+rtl8192eu-linux-driver/
+*.pdf
+secrets.yaml

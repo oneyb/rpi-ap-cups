@@ -1,0 +1,77 @@
+* Description
+A wireless access point and home assistant running on a raspberry pi, configured with ansible.
+
+* Usage
+ 
+This is how I currently use this stuff.
+#+BEGIN_SRC shell :session *Shell* :dir ~/rpi-ap-ha
+ansible-playbook -i inventory install-ap.yaml --ask-become-pass
+#+END_SRC
+* Useful documentation
+http://docs.ansible.com/ansible/latest/systemd_module.html
+http://docs.ansible.com/ansible/latest/template_module.html
+https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md
+https://github.com/raspberrypi/documentation/blob/master/configuration/wireless/access-point.md
+
+* Goals
+** Local Printing server
+   - wifi-accessible
+   - useful for less technical
+   - secure
+* Implementation
+The following is the debugging stuff I went through to come to my solution.
+** pi as local Printing server
+
+*** set up pi as wifi hotspot
+
+    - a lá: 
+      - https://elinux.org/RPI-Wireless-Hotspot
+      - https://frillip.com/using-your-raspberry-pi-3-as-a-wifi-access-point-with-hostapd/
+      - https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md
+    - *check out table for good card*: https://elinux.org/RPi_USB_Wi-Fi_Adapters
+    - *Worked for me*:
+      - CSL 300mbps 2 antennae, ID 148f:5572 Ralink Technology, Corp. RT5572 Wireless Adapter [[https://www.amazon.de/gp/product/B00LLIOT34/ref=ox_sc_act_title_2?smid=AEB9F56C3A3O6&psc=1][buy]] 
+      - EW-7811Un USB ID 7392:7811, [[https://www.amazon.de/dp/B003MTTJOY/ref=twister_B00I8G1LWY?_encoding=UTF8&th=1][buy]] 
+
+
+#+HEADER: :var ap=192.168.0.10
+#+BEGIN_SRC shell :session *Shell* :results silent
+  ssh-copy-id pi@${ap}
+  ssh pi@${ap}
+#+END_SRC
+
+*** TODO Translate the following into a playbook
+#+BEGIN_SRC shell :session *Shell* :results silent
+  sudo mkdir /opt/airprint
+  cd /opt/airprint
+  sudo git clone https://github.com/tjfontaine/airprint-generate.git
+  sudo ln -sf airprint-generate/airprint-generate.py .
+  sudo python airprint-generate.py -d /etc/avahi/services
+  sudo adduser pi lpadmin
+  sudo systemctl restart cups avahi-daemon
+  sudo systemctl status cups avahi-daemon
+  sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+  sudo iptables -A FORWARD -i eth0 -o $interface -m state --state RELATED,ESTABLISHED -j ACCEPT
+  sudo iptables -A FORWARD -i $interface -o eth0 -j ACCEPT
+  sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
+#+END_SRC
+
+And it just works. Awesome.
+*If it doesn't and you have an HP-printer, please run ~hp-doctor~.*
+
+*** backup important stuff
+[[file:backup.yaml]]
+
+*** Install important stuff with ansible 
+
+#+NAME: rpi-wifi-yaml
+[[file:install-ap.yaml]]
+
+** TODO make templates
+#+BEGIN_SRC shell :dir ~/rpi-ap-ha/ :results raw
+sed -ri 's/192\.168\.42/{{ ipv4address }}/g;s/eth0/{{ br_interface }}/g;s/wlan0/{{ ap_interface }}/g' templates/*
+#+END_SRC
+
+#+RESULTS:
+
+

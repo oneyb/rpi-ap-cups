@@ -1,0 +1,34 @@
+# interfaces(5) file used by ifup(8) and ifdown(8)
+
+# Please note that this file is written to be used with dhcpcd
+# For static IP, consult /etc/dhcpcd.conf and 'man dhcpcd.conf'
+
+# Include files from /etc/network/interfaces.d:
+# source-directory /etc/network/interfaces.d
+
+
+# auto lo
+# iface lo inet loopback
+
+allow-hotplug {{ br_interface }}
+iface {{ br_interface }} inet dhcp
+
+# # for system management, depends on 'lo'
+# auto {{ ap_interface }}
+# iface {{ ap_interface }} inet loopback
+# 
+# # automatic connection with wpa
+# auto-hotplug {{ ap_interface }}
+# iface {{ ap_interface }} inet dhcp
+#   wpa-conf /etc/wpa_supplicant.conf
+
+
+auto {{ ap_interface }}  
+iface {{ ap_interface }} inet static  
+  address {{ ipv4address }}.1
+  netmask 255.255.255.0
+  network {{ ipv4address }}.0
+  broadcast {{ ipv4address }}.255
+
+up iptables-restore < /etc/iptables.ipv4.nat
+
