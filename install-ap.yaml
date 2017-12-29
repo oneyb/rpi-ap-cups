@@ -1,8 +1,8 @@
 ---
 - hosts: all
   vars:
-    backup_dir: ~/local-rpi-server/backup-preinstall
-    template_dir: ~/local-rpi-server/templates
+    backup_dir: ~/rpi-ap-ha/backup-preinstall
+    template_dir: ~/rpi-ap-ha/templates
   tasks:
   - name: install necessary packages
     apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
