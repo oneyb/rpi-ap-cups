@@ -7,7 +7,8 @@ This is how I currently use this stuff.
 #+BEGIN_SRC shell :session *Shell* :dir ~/rpi-ap-ha
 ansible-playbook -i inventory install-ap.yaml --ask-become-pass
 #+END_SRC
-* Useful documentation
+** Useful documentation
+
 http://docs.ansible.com/ansible/latest/systemd_module.html
 http://docs.ansible.com/ansible/latest/template_module.html
 https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md
@@ -73,8 +74,6 @@ ansible-playbook -i inventory backup.yaml --ask-become-pass
 #+BEGIN_SRC shell :session *Shell* :dir ~/rpi-ap-ha
 ansible-playbook -i inventory install-ap.yaml --ask-become-pass
 #+END_SRC
-* TODO TODO List
-
 ** make templates from configured files
 #+BEGIN_SRC shell :dir ~/rpi-ap-ha/ :results raw
 sed -ri 's/192\.168\.42/{{ ipv4address }}/g;s/eth0/{{ br_interface }}/g;s/wlan0/{{ ap_interface }}/g' templates/*
@@ -82,3 +81,8 @@ sed -ri 's/192\.168\.42/{{ ipv4address }}/g;s/eth0/{{ br_interface }}/g;s/wlan0/
 
 
 
+* TODO TODO List
+
+  - [ ] Freeze/pin functionality to a version of ansible
+  - [ ] translate airprint & iptables scripting to yaml
+  - [ ] test/have testing environment available
