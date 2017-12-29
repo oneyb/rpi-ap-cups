@@ -6,3 +6,4 @@ did-not-work/
 rtl8192eu-linux-driver/
 *.pdf
 secrets.yaml
+hosts

@@ -1,8 +1,8 @@
 ---
-- hosts: barry.local
-  become: pi
+- hosts: all
   vars:
-    backup_dir: ~/local-rpi-server/backup-config
+    backup_dir: ~/local-rpi-server/backup-preinstall
+    template_dir: ~/local-rpi-server/templates
   tasks:
   - name: install necessary packages
     apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
@@ -27,23 +27,23 @@
       - hplip
       - avahi-discover
       - samba
-  - name: install wifi config files
-    copy: src={{ backup_dir }}/{{ item | basename }} dest={{ item }} owner=root mode=0600
-    become: yes
-    become_method: sudo
-    with_items:
-      - /etc/hostapd/hostapd.conf
-      - /etc/default/hostapd
-      - /etc/sysctl.conf
-      - /etc/dnsmasq.conf
-      - /etc/network/interfaces
-      - /etc/dhcpcd.conf
-      - /etc/default/udhcpd
-      - /etc/iptables.ipv4.nat
-      - /etc/cups/cupsd.conf
-  - name: fill and wifi config files
+  # - name: restore wifi config files
+  #   copy: src={{ backup_dir }}/{{ item | basename }} dest={{ item }} owner=root mode=0600
+  #   become: yes
+  #   become_method: sudo
+  #   with_items:
+  #     - /etc/hostapd/hostapd.conf
+  #     - /etc/default/hostapd
+  #     - /etc/sysctl.conf
+  #     - /etc/dnsmasq.conf
+  #     - /etc/network/interfaces
+  #     - /etc/dhcpcd.conf
+  #     - /etc/default/udhcpd
+  #     - /etc/iptables.ipv4.nat
+  #     - /etc/cups/cupsd.conf
+  - name: fill and copy wifi config files
     template: 
-      src: '{{ backup_dir }}/{{ item | basename }}' 
+      src: '{{ template_dir }}/{{ item | basename }}' 
       dest: {{ item }} 
       owner: root 
       mode: 0600

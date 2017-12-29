@@ -1,3 +1,2 @@
 [hostapds]
-#barry.local
-goshevi-1001PXD.local
+raspberry.local user=pi
