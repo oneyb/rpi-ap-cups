@@ -1,7 +1,13 @@
 ---
 - hosts: all
-
   tasks:
+
+  #   # for home assistant
+  # - name: change password
+  #   user:
+  #     name: ha
+  #     password: $6$/5ndW1SIsXFJCHZ6$xa1uq6z3EJTvAWxvWTijTx.QIF8kjljdZVycFDpj7y5sw5zvRigUM74rsyGyx088r9Ib9lB.4R8p/xmuWrcZP0
+
   - name: get config
     git:
       # repo: ssh://git@github.com:oneyb/config.git
