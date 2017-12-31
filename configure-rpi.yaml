@@ -91,5 +91,3 @@
   #   become: yes
   #   become_method: sudo
 
-  # - name: stop bluetooth
-  #   systemd: name=hciuart state=stopped enabled=no
