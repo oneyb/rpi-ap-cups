@@ -1,0 +1,95 @@
+---
+- hosts: all
+
+  tasks:
+  - name: get config
+    git:
+      # repo: ssh://git@github.com:oneyb/config.git
+      repo: https://github.com/oneyb/config.git
+      dest: documents/config
+      update: yes
+
+  - name: stop bluetooth
+    systemd: name=hciuart state=stopped enabled=no
+    become: yes
+    become_method: sudo
+
+  - name: install necessary packages
+    become: yes
+    become_method: sudo
+    apt:
+      update_cache: yes
+      cache_valid_time: 86400
+      name: "{{ item }}"
+    with_items:
+      - vim
+      - emacs
+      - parcellite
+      - rsync
+  
+  - name: remove unnecessary packages
+    become: yes
+    become_method: sudo
+    apt:
+      name: "{{ item }}"
+      state: absent
+      autoremove: yes
+    with_items:
+      - wolfram-engine
+      - sonic-pi
+
+  - name: make ~/bin
+    file:
+      path: "{{ ansible_env.HOME }}/bin"
+      state: directory
+
+  - name: install config
+    command: bash documents/config/.copy-config.sh in
+    
+  - name: install config
+    command: vim +PlugInstall +qall
+
+  # - name: set uart according to 'https://hallard.me/enable-serial-port-on-raspberry-pi/'
+  # - replace:
+  #     path: /boot/config.txt
+  #     regexp: 'enable_uart=0'
+  #     replace: 'enable_uart=1' 
+  #     become: yes
+  #     become_method: sudo
+  #     # backup: yes
+  # # SEE BELOW
+
+  # - name: set raspberry options
+  #   command: {{ item | quote }}
+  #   become: yes
+  #   become_method: sudo
+  #   with_items:
+  #     # - raspi-config nonint do_expand_rootfs
+  #     # - raspi-config nonint do_hostname {{ hostname }}
+  #     # - raspi-config nonint do_boot_behaviour B1
+  #     # - raspi-config nonint do_boot_behaviour B2
+  #     # - raspi-config nonint do_boot_behaviour B3
+  #     # - raspi-config nonint do_boot_behaviour B4
+  #     # - raspi-config nonint do_boot_wait 1
+  #     # - raspi-config nonint do_boot_splash 1
+  #     # - raspi-config nonint do_overscan 1
+  #     # - raspi-config nonint do_camera 1
+  #     # - raspi-config nonint do_ssh 1
+  #     # - raspi-config nonint do_vnc 1
+  #     # - raspi-config nonint do_spi 1
+  #     # - raspi-config nonint do_i2c 1
+  #     - raspi-config nonint do_serial 1
+  #     # - raspi-config nonint do_onewire 1
+  #     # - raspi-config nonint do_rgpio 1
+  #     # - raspi-config nonint do_overclock %s
+  #     # - raspi-config nonint do_memory_split 1
+  #     # - raspi-config nonint do_resolution %d %d
+  #     # - raspi-config nonint do_wifi_country %s
+
+  # - name: set serial to on
+  #   command: raspi-config nonint dtoverlay=pi3-disable-bt
+  #   become: yes
+  #   become_method: sudo
+
+  # - name: stop bluetooth
+  #   systemd: name=hciuart state=stopped enabled=no
