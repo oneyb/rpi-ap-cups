@@ -1,62 +1,52 @@
 ---
 - hosts: all
+
   tasks:
-
-    # for home assistant
-  - name: change password
-    user:
-      name: pi
-      password: $6$/5ndW1SIsXFJCHZ6$xa1uq6z3EJTvAWxvWTijTx.QIF8kjljdZVycFDpj7y5sw5zvRigUM74rsyGyx088r9Ib9lB.4R8p/xmuWrcZP0
-      update_password: always
-
-  - name: get config
-    git:
-      # repo: ssh://git@github.com:oneyb/config.git
-      repo: https://github.com/oneyb/config.git
-      dest: documents/config
-      update: yes
-
-  - name: stop bluetooth
-    systemd: name=hciuart state=stopped enabled=no
+  - name: install latest udev rules
     become: yes
     become_method: sudo
+    get_url:
+      url: https://raw.githubusercontent.com/platformio/platformio-core/develop/scripts/99-platformio-udev.rules
+      dest: /etc/udev/rules.d/99-platformio-udev.rules
+      checksum: md5:0e2b1ca60999cd648c1d68062c8b7075
+      owner: root
 
   - name: install necessary packages
+    apt: name={{ item }}
     become: yes
     become_method: sudo
-    apt:
-      update_cache: yes
-      cache_valid_time: 86400
-      name: "{{ item }}"
     with_items:
-      - vim
-      - emacs
-      - parcellite
-      - rsync
-  
-  - name: remove unnecessary packages
+      - clang
+      - libusb-0.1-4
+
+      # better use the ide for starters and make a soft link
+  # - name: install necessary python packages
+  #   pip: name={{ item }}
+  #   become: yes
+  #   become_method: sudo
+  #   with_items:
+  #     - platformio
+
+  - name: put user in necessary groups
+    user: 
+      name: "{{ ansible_user }}"
+      groups: dialout,plugdev
+      append: yes
+
+  - name: set serial to on
+    command: raspi-config nonint dtoverlay=pi3-disable-bt
     become: yes
     become_method: sudo
-    apt:
-      name: "{{ item }}"
-      state: absent
-      autoremove: yes
+
+  - name: stop bluetooth stuff
+    systemd: name={{ item }} state=stopped enabled=no
+    become: yes
+    become_method: sudo
     with_items:
-      - wolfram-engine
-      - sonic-pi
-      - bluej
-      - greenfoot
+      - hciuart
+      - bluetoothd
 
-  - name: make ~/bin
-    file:
-      path: "{{ ansible_env.HOME }}/bin"
-      state: directory
 
-  - name: install config
-    command: bash documents/config/.copy-config.sh in
-    
-  # - name: install config
-  #   command: vim +PlugInstall +qall
 
   # - name: set uart according to 'https://hallard.me/enable-serial-port-on-raspberry-pi/'
   # - replace:
@@ -94,9 +84,4 @@
   #     # - raspi-config nonint do_memory_split 1
   #     # - raspi-config nonint do_resolution %d %d
   #     # - raspi-config nonint do_wifi_country %s
-
-  # - name: set serial to on
-  #   command: raspi-config nonint dtoverlay=pi3-disable-bt
-  #   become: yes
-  #   become_method: sudo
 
