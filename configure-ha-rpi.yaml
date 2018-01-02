@@ -42,6 +42,13 @@
     with_items:
       - rpi-rf
 
+  - name: make ~/.homeassistant otherwise writeable
+    become: yes
+    become_method: sudo
+    file:
+      path: /home/homeassistant/.homeassistant/
+      mode: 0770
+
   # - name: change hostname to own
   #   become: yes
   #   become_method: sudo
