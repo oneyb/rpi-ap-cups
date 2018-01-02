@@ -13,3 +13,4 @@ homeassistant/secrets.yaml
 homeassistant/home-assistant*
 homeassistant/.HA_VERSION
 homeassistant/.uuid
+home-assistant.github.io/

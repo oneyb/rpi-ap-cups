@@ -55,8 +55,15 @@
   - name: install config
     command: bash documents/config/.copy-config.sh in
     
-  # - name: install config
+  # - name: install vim-plug NOW managed from VIM
+  #   get_url:
+  #     url: https://raw.githubusercontent.com/platformio/platformio-core/develop/scripts/99-platformio-udev.rules
+  #     dest: "{{ ansible_env.HOME }}/.vim/autoload/plug.vim"
+  # - name: install vim plug-ins
   #   command: vim +PlugInstall +qall
+
+  - name: add basic command line control
+    lineinfile: dest="{{ ansible_env.HOME }}/.bashrc" line="set -o vi"
 
   # - name: set uart according to 'https://hallard.me/enable-serial-port-on-raspberry-pi/'
   # - replace:
