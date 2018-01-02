@@ -34,6 +34,7 @@
       - mupdf-tools
       - tor 
       - tor-arm
+      - wiringpi
 
   - name: install latest version of important libraries
     pip: name={{ item }} extra_args="--upgrade" executable=pip3
@@ -48,6 +49,30 @@
     file:
       path: /home/homeassistant/.homeassistant/
       mode: 0770
+
+  - name: get 433utils
+    git:
+      repo: https://github.com/ninjablocks/433Utils
+      dest: "{{ ansible_env.HOME }}/github/433Utils"
+      recursive: yes
+
+  - name: compile 433Utils
+    make:
+      chdir: "{{ ansible_env.HOME }}/github/433Utils/RPi_utils"
+      target: all
+
+  - name: install 433Utils
+    file:
+      src: "{{ ansible_env.HOME }}/github/433Utils/RPi_utils/{{ item }}"
+      dest: "/usr/local/bin/{{ item }}"
+      state: link
+    with_items:
+      - codesend      
+      - send 
+      - RFSniffer 
+    become: yes
+    become_method: sudo
+
 
   # - name: change hostname to own
   #   become: yes
