@@ -41,7 +41,7 @@ updater:
 discovery:
 
 # Allows you to issue voice commands from the frontend in enabled browsers
-conversation:
+# conversation:
 
 # Enables support for tracking state changes over time
 history:
@@ -50,7 +50,7 @@ history:
 logbook:
 
 # Enables a map showing the location of tracked devices
-map:
+# map:
 
 # Track the sun
 sun:
@@ -75,7 +75,7 @@ tts:
   - platform: google
 
 # Cloud
-cloud:
+# cloud:
 
 group: !include groups.yaml
 automation: !include automations.yaml
