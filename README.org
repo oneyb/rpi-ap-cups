@@ -10,8 +10,11 @@ ansible-playbook -i inventory install-ap.yaml --ask-become-pass
 ** Useful documentation
 
 http://docs.ansible.com/ansible/latest/systemd_module.html
+
 http://docs.ansible.com/ansible/latest/template_module.html
+
 https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md
+
 https://github.com/raspberrypi/documentation/blob/master/configuration/wireless/access-point.md
 
 * Goals
