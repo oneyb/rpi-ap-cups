@@ -10,8 +10,15 @@
 # auto lo
 # iface lo inet loopback
 
+auto eth0
 allow-hotplug {{ br_interface }}
-iface {{ br_interface }} inet dhcp
+    iface {{ br_interface }} inet static
+    address {{ br_ipv4address }}
+    netmask 255.255.255.0
+    gateway 192.168.0.1
+
+# allow-hotplug {{ br_interface }}
+#    iface {{ br_interface }} inet dhcp
 
 # # for system management, depends on 'lo'
 # auto {{ ap_interface }}
@@ -25,10 +32,10 @@ iface {{ br_interface }} inet dhcp
 
 auto {{ ap_interface }}  
 iface {{ ap_interface }} inet static  
-  address {{ ipv4address }}.1
+  address {{ ap_ipv4address }}.1
   netmask 255.255.255.0
-  network {{ ipv4address }}.0
-  broadcast {{ ipv4address }}.255
+  network {{ ap_ipv4address }}.0
+  broadcast {{ ap_ipv4address }}.255
 
 up iptables-restore < /etc/iptables.ipv4.nat
 

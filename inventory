@@ -1,2 +1,2 @@
 [hostapds]
-raspberry.local user=pi
+raspberrypi.local user=pi

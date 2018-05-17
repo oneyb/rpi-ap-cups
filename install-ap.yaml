@@ -1,13 +1,15 @@
 ---
 - hosts: all
   vars:
-    backup_dir: ~/rpi-ap-ha/backup-preinstall
-    template_dir: ~/rpi-ap-ha/templates
+    backup_dir: ~/ensectable/rpi-ap-ha/backup-preinstall
+    template_dir: ~/ensectable/rpi-ap-ha/templates
   tasks:
+  - name: get secrets
+    # include_vars: file=secrets.yaml
+    include_vars: file=config.yaml
   - name: install necessary packages
     apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
     become: yes
-    become_method: sudo
     with_items:
       - hostapd
       - dnsmasq
@@ -44,12 +46,11 @@
   - name: fill and copy wifi config files
     template: 
       src: '{{ template_dir }}/{{ item | basename }}' 
-      dest: {{ item }} 
+      dest: '{{ item }}' 
       owner: root 
       mode: 0600
       backup: yes
     become: yes
-    become_method: sudo
     with_items:
       - /etc/hostapd/hostapd.conf
       - /etc/default/hostapd
@@ -57,13 +58,12 @@
       - /etc/dnsmasq.conf
       - /etc/network/interfaces
       - /etc/dhcpcd.conf
-      - /etc/default/udhcpd
+      # - /etc/default/udhcpd
       - /etc/iptables.ipv4.nat
       - /etc/cups/cupsd.conf
-  - name: start necessary services
+  - name: (re)start necessary services
     systemd: name={{ item }} state=restarted daemon_reload=yes enabled=yes
     become: yes
-    become_method: sudo
     with_items:
       - udhcpd
       - hostapd
@@ -74,6 +74,18 @@
   - name: disable necessary/blocking services
     systemd: name={{ item }} state=stopped enabled=no
     become: yes
-    become_method: sudo
+    ignore_errors: yes
     with_items:
       - NetworkManager
+  # - name: disable necessary/blocking services with error handling
+  #   block:
+  #     - debug:
+  #       msg: 'I execute normally'
+  #     - systemd: name={{ item }} state=stopped enabled=no
+  #       become: yes
+  #       ignore_errors: yes
+  #       with_items:
+  #         - NetworkManager
+  #   rescue:
+  #     - debug:
+  #       msg: 'I caught an error'

@@ -1,0 +1,8 @@
+---
+  br_interface: eth0 
+  ap_interface: wlan0 
+  ap_ipv4address: 192.168.42
+  br_ipv4address: 192.168.0.10
+  ssid: cool_network_name
+  psk: "strongpassword09789087..;.;.,.;.,"
+

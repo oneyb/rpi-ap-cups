@@ -1,21 +1,29 @@
 * Description
-A wireless access point and home assistant running on a raspberry pi, configured with ansible.
+A wireless access point, printing server, and home assistant running on a raspberry pi, configured with ansible.
 
 * Usage
- 
+  1. Copy public ssh key to host
+  2. create =config.yaml= [[file:config.yaml][file]]
+  3. Run playbooks i.e. see below
+     
 This is how I currently use this stuff.
 #+BEGIN_SRC shell :session *Shell* :dir ~/rpi-ap-ha
-ansible-playbook -i inventory install-ap.yaml --ask-become-pass
+ansible-playbook -i raspberrypi.local, --user=pi install-ap.yaml 
 #+END_SRC
+
 ** Useful documentation
+Ansible doc examples
+#+BEGIN_SRC shell
+# http://docs.ansible.com/ansible/latest/systemd_module.html
+ansible-doc systemd
+# http://docs.ansible.com/ansible/latest/template_module.html
+ansible-doc template
+#+END_SRC
 
-http://docs.ansible.com/ansible/latest/systemd_module.html
+Best Raspberry AP doc:
+  - https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md
+  - https://elinux.org/RPI-Wireless-Hotspot
 
-http://docs.ansible.com/ansible/latest/template_module.html
-
-https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md
-
-https://github.com/raspberrypi/documentation/blob/master/configuration/wireless/access-point.md
 
 * Goals
 ** Local Printing server
@@ -30,7 +38,6 @@ The following is the debugging stuff I went through to come to my solution.
 
     - a lá: 
       - https://elinux.org/RPI-Wireless-Hotspot
-      - https://frillip.com/using-your-raspberry-pi-3-as-a-wifi-access-point-with-hostapd/
       - https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md
     - *check out table for good card*: https://elinux.org/RPi_USB_Wi-Fi_Adapters
     - *Worked for me*:
