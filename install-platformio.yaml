@@ -8,7 +8,7 @@
     get_url:
       url: https://raw.githubusercontent.com/platformio/platformio-core/develop/scripts/99-platformio-udev.rules
       dest: /etc/udev/rules.d/99-platformio-udev.rules
-      checksum: md5:0e2b1ca60999cd648c1d68062c8b7075
+      checksum: md5:f914ffef19ed3df117e615dc187b7754
       owner: root
 
   - name: install necessary packages
@@ -19,13 +19,13 @@
       - clang
       - libusb-0.1-4
 
-      # better use the ide for starters and make a soft link
-  # - name: install necessary python packages
-  #   pip: name={{ item }}
-  #   become: yes
-  #   become_method: sudo
-  #   with_items:
-  #     - platformio
+  # better use the ide for starters and make a soft link
+  - name: install necessary python packages
+    pip: name={{ item }} extra_args="--upgrade" executable=pip
+    become: yes
+    become_method: sudo
+    with_items:
+      - platformio
 
   - name: put user in necessary groups
     user: 

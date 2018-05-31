@@ -33,6 +33,7 @@
       - emacs
       - parcellite
       - rsync
+      - git
   
   - name: remove unnecessary packages
     become: yes
