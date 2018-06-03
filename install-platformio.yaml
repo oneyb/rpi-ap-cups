@@ -1,6 +1,6 @@
 ---
 - hosts: all
-
+  # run this: ansible-playbook -i raspberrypi.local, -u pi configure-ha-rpi.yaml
   tasks:
   - name: install latest udev rules
     become: yes
@@ -17,7 +17,10 @@
     become_method: sudo
     with_items:
       - clang
+      - python-pip
       - libusb-0.1-4
+      - python-backports.functools-lru-cache
+
 
   # better use the ide for starters and make a soft link
   - name: install necessary python packages
@@ -33,6 +36,7 @@
       groups: dialout,plugdev
       append: yes
 
+    # from: http://docs.platformio.org/en/latest/platforms/atmelavr.html
   - name: set serial to on
     command: raspi-config nonint dtoverlay=pi3-disable-bt
     become: yes
@@ -44,7 +48,7 @@
     become_method: sudo
     with_items:
       - hciuart
-      - bluetoothd
+      - bluetooth
 
 
 

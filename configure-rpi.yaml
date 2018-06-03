@@ -1,5 +1,7 @@
 ---
 - hosts: all
+  # run this: ansible-playbook -i raspberrypi.local, -u pi configure-rpi.yaml -e new_hostname=barrybig -e domain="snb-home"
+
   tasks:
 
     # for home assistant
@@ -8,36 +10,23 @@
       name: pi
       password: $6$/5ndW1SIsXFJCHZ6$xa1uq6z3EJTvAWxvWTijTx.QIF8kjljdZVycFDpj7y5sw5zvRigUM74rsyGyx088r9Ib9lB.4R8p/xmuWrcZP0
       update_password: always
-
-  - name: get config
-    git:
-      # repo: ssh://git@github.com:oneyb/config.git
-      repo: https://github.com/oneyb/config.git
-      dest: documents/config
-      update: yes
-
-  - name: stop bluetooth
-    systemd: name=hciuart state=stopped enabled=no
     become: yes
-    become_method: sudo
 
-  - name: install necessary packages
+  - name: stop bluetooth stuff
+    systemd: name={{ item }} state=stopped enabled=no
     become: yes
-    become_method: sudo
-    apt:
-      update_cache: yes
-      cache_valid_time: 86400
-      name: "{{ item }}"
     with_items:
-      - vim
-      - emacs
-      - parcellite
-      - rsync
-      - git
+      - hciuart
+      - bluetooth
+
+  - name: upgrade system
+    become: yes
+    apt:
+      # upgrade: dist
+      upgrade: full
   
   - name: remove unnecessary packages
     become: yes
-    become_method: sudo
     apt:
       name: "{{ item }}"
       state: absent
@@ -48,13 +37,21 @@
       - bluej
       - greenfoot
 
+  # - name: get config
+  #   git:
+  #     # repo: ssh://git@github.com:oneyb/config.git
+  #     repo: https://github.com/oneyb/config.git
+  #     dest: documents/config
+  #     update: yes
+
+  # - name: install config
+  #   command: bash documents/config/.copy-config.sh in
+
   - name: make ~/bin
     file:
       path: "{{ ansible_env.HOME }}/bin"
       state: directory
 
-  - name: install config
-    command: bash documents/config/.copy-config.sh in
     
   # - name: install vim-plug NOW managed from VIM
   #   get_url:
@@ -64,7 +61,11 @@
   #   command: vim +PlugInstall +qall
 
   - name: add basic command line control
-    lineinfile: dest="{{ ansible_env.HOME }}/.bashrc" line="set -o vi"
+    lineinfile: dest="{{ item.dest }}" line="{{ item.line }}"
+    with_items:
+      - { dest: "{{ ansible_env.HOME }}/.bashrc", line: "set -o vi" }
+      - { dest: "{{ ansible_env.HOME }}/.bashrc", line: "alias ll='ls -al'" }
+
 
   # - name: set uart according to 'https://hallard.me/enable-serial-port-on-raspberry-pi/'
   # - replace:
@@ -72,14 +73,12 @@
   #     regexp: 'enable_uart=0'
   #     replace: 'enable_uart=1' 
   #     become: yes
-  #     become_method: sudo
   #     # backup: yes
   # # SEE BELOW
 
   # - name: set raspberry options
   #   command: {{ item | quote }}
   #   become: yes
-  #   become_method: sudo
   #   with_items:
   #     # - raspi-config nonint do_expand_rootfs
   #     # - raspi-config nonint do_hostname {{ hostname }}
@@ -106,5 +105,21 @@
   # - name: set serial to on
   #   command: raspi-config nonint dtoverlay=pi3-disable-bt
   #   become: yes
-  #   become_method: sudo
 
+
+  - name: change hostname to own
+    become: yes
+    replace:
+      path: /etc/hosts
+      after: '127\.0\..*$'
+      regexp: '127\.0\..*$'
+      replace: '127.0.1.1\t{{ domain }} {{ new_hostname }}'
+
+  - name: rebooting things
+    shell: systemctl reboot
+    become: yes
+    async: 0
+    poll: 0
+
+  - name: wait for rebooted computer to test for changes
+    local_action: wait_for host="{{ new_hostname }}.local" state=started
