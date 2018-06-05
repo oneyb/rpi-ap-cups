@@ -37,6 +37,24 @@
       - bluej
       - greenfoot
 
+  - name: install necessary packages
+    apt: pkg={{ item }} update_cache=yes cache_valid_time=86400
+    become: yes
+    with_items:
+      - git
+      - emacs25
+      - vim-nox
+
+  - name: get spacemacs
+    git:
+      # repo: ssh://git@github.com:oneyb/config.git
+      repo: https://github.com/syl20bnr/spacemacs 
+      dest: "{{ ansible_user_home }}/.emacs.d/"
+      update: yes
+
+  - name: install spacemacs packages
+    command: "emacs --daemon | yes"
+
   # - name: get config
   #   git:
   #     # repo: ssh://git@github.com:oneyb/config.git
