@@ -36,30 +36,36 @@
       groups: dialout,plugdev
       append: yes
 
-    # from: http://docs.platformio.org/en/latest/platforms/atmelavr.html
-  - name: set serial to on
-    command: raspi-config nonint dtoverlay=pi3-disable-bt
-    become: yes
-    become_method: sudo
 
   - name: stop bluetooth stuff
     systemd: name={{ item }} state=stopped enabled=no
     become: yes
-    become_method: sudo
     with_items:
       - hciuart
       - bluetooth
 
 
+  #   # from: http://docs.platformio.org/en/latest/platforms/atmelavr.html
+  # - name: set serial to on
+  #   command: raspi-config nonint dtoverlay=pi3-disable-bt
+  #   become: yes
+  #   become_method: sudo
+
+  - name: set uart according to https://www.raspberrypi.org/documentation/configuration/uart.md
+    lineinfile: dest="{{ item.dest }}" line="{{ item.line }}"
+    with_items:
+      - { dest: "/boot/config.txt", line: "enable_uart=1" }
+      - { dest: "/boot/config.txt", line: "dtoverlay=pi3-disable-bt" }
+    become: yes
 
   # - name: set uart according to 'https://hallard.me/enable-serial-port-on-raspberry-pi/'
   # - replace:
   #     path: /boot/config.txt
   #     regexp: 'enable_uart=0'
   #     replace: 'enable_uart=1' 
-  #     become: yes
-  #     become_method: sudo
-  #     # backup: yes
+  #     backup: yes
+  #   become: yes
+
   # # SEE BELOW
 
   # - name: set raspberry options

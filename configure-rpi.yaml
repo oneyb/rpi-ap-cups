@@ -45,6 +45,12 @@
       - emacs25
       - vim-nox
 
+  - name: run stuff
+    command: {{ item }}
+    become: yes
+    with_items:
+      - "timedatectl set-timezone {{ timezone }}"
+
   - name: get spacemacs
     git:
       # repo: ssh://git@github.com:oneyb/config.git
