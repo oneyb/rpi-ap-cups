@@ -79,7 +79,7 @@
     
   # - name: install vim-plug NOW managed from VIM
   #   get_url:
-  #     url: https://raw.githubusercontent.com/platformio/platformio-core/develop/scripts/99-platformio-udev.rules
+  #     url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   #     dest: "{{ ansible_env.HOME }}/.vim/autoload/plug.vim"
   # - name: install vim plug-ins
   #   command: vim +PlugInstall +qall

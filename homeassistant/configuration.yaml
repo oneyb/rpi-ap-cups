@@ -59,6 +59,7 @@ sun:
 sensor:
   - platform: yr
 
+    
     # Example configuration.yaml entry
 switch:
   - platform: rpi_rf
@@ -80,3 +81,37 @@ tts:
 group: !include groups.yaml
 automation: !include automations.yaml
 script: !include scripts.yaml
+
+logger:
+  default: info
+  logs:
+    homeassistant.components.mysensors: debug
+    mysensors: debug
+
+mysensors:
+  gateways:
+      - device: '/dev/ttyUSBMySensorsGateway'
+      #      persistence_file: 'path/mysensors.json'
+      #      baud_rate: 38400
+      #      nodes:
+      #        1:
+      #          name: 'kitchen'
+      #        3:
+      #          name: 'living_room'
+      #    - device: '/dev/ttyACM0'
+      #      persistence_file: 'path/mysensors2.json'
+      #      baud_rate: 115200
+      #    - device: '192.168.1.18'
+      #      persistence_file: 'path/mysensors3.json'
+      #      tcp_port: 5003
+      #    - device: mqtt
+      #      persistence_file: 'path/mysensors4.json'
+      #      topic_in_prefix: 'mygateway1-out'
+      #      topic_out_prefix: 'mygateway1-in'
+      #  optimistic: false
+      #  persistence: true
+      #  retain: true
+  version: '2.2' 
+ 
+ 
+ 
