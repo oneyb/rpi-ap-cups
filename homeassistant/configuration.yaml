@@ -56,8 +56,8 @@ logbook:
 sun:
 
 # Weather prediction
-sensor:
-  - platform: yr
+# sensor:
+#   - platform: yr
 
     
     # Example configuration.yaml entry
@@ -71,9 +71,9 @@ switch:
         protocol: 1
         # signal_repetitions: 15
         
-# Text to speech
-tts:
-  - platform: google
+# # Text to speech
+# tts:
+#   - platform: google
 
 # Cloud
 # cloud:
