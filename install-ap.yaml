@@ -1,12 +1,12 @@
 ---
 - hosts: all
   vars:
-    backup_dir: ~/ensectable/rpi-ap-ha/backup-preinstall
-    template_dir: ~/ensectable/rpi-ap-ha/templates
+    backup_dir: ~/insectplus/rpi-ap-cups/backup-preinstall
+    template_dir: ~/insectplus/rpi-ap-cups/templates
   tasks:
   - name: get secrets
-    # include_vars: file=secrets.yaml
-    include_vars: file=config.yaml
+    include_vars: file=secrets.yaml
+    # include_vars: file=config.yaml
   - name: install necessary packages
     apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
     become: yes
@@ -57,7 +57,7 @@
       - /etc/sysctl.conf
       - /etc/dnsmasq.conf
       - /etc/network/interfaces
-      - /etc/dhcpcd.conf
+      - /etc/udhcpd.conf
       # - /etc/default/udhcpd
       - /etc/iptables.ipv4.nat
       - /etc/cups/cupsd.conf
@@ -71,12 +71,18 @@
       - avahi-daemon
       - cups
       - networking
+    ignore_errors: true
+
+  - name: waiting for server to come back after reboot
+    wait_for_connection:
   - name: disable necessary/blocking services
     systemd: name={{ item }} state=stopped enabled=no
     become: yes
     ignore_errors: yes
     with_items:
       - NetworkManager
+      - dhcpcd
+
   # - name: disable necessary/blocking services with error handling
   #   block:
   #     - debug:

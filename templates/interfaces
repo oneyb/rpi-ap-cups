@@ -10,15 +10,16 @@
 # auto lo
 # iface lo inet loopback
 
+# auto eth0
+# allow-hotplug {{ br_interface }}
+#     iface {{ br_interface }} inet static
+#     address {{ br_ipv4address }}
+#     netmask 255.255.255.0
+#     gateway 192.168.0.1
+
 auto eth0
 allow-hotplug {{ br_interface }}
-    iface {{ br_interface }} inet static
-    address {{ br_ipv4address }}
-    netmask 255.255.255.0
-    gateway 192.168.0.1
-
-# allow-hotplug {{ br_interface }}
-#    iface {{ br_interface }} inet dhcp
+   iface {{ br_interface }} inet dhcp
 
 # # for system management, depends on 'lo'
 # auto {{ ap_interface }}
