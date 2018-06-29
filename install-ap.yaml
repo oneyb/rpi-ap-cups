@@ -28,7 +28,7 @@
       - avahi-utils
       - hplip
       - avahi-discover
-      - samba
+      - python3-pip
   # - name: restore wifi config files
   #   copy: src={{ backup_dir }}/{{ item | basename }} dest={{ item }} owner=root mode=0600
   #   become: yes
@@ -62,7 +62,7 @@
       - /etc/iptables.ipv4.nat
       - /etc/cups/cupsd.conf
   - name: (re)start necessary services
-    systemd: name={{ item }} state=restarted daemon_reload=yes enabled=yes
+    systemd: name={{ item }} state=restarted daemon_reload=yes enabled=yes no_block=yes
     become: yes
     with_items:
       - udhcpd
@@ -72,9 +72,11 @@
       - cups
       - networking
     ignore_errors: true
+    
 
-  - name: waiting for server to come back after reboot
+  - name: waiting for server to come back after services
     wait_for_connection:
+
   - name: disable necessary/blocking services
     systemd: name={{ item }} state=stopped enabled=no
     become: yes
@@ -82,6 +84,16 @@
     with_items:
       - NetworkManager
       - dhcpcd
+
+  - name: restart server
+    shell: sleep 2 && systemctl reboot
+    async: 1
+    poll: 0
+    become: yes
+    ignore_errors: true
+
+  - name: waiting for server to come back after services
+    wait_for_connection:
 
   # - name: disable necessary/blocking services with error handling
   #   block:
@@ -95,3 +107,9 @@
   #   rescue:
   #     - debug:
   #       msg: 'I caught an error'
+
+  - name: install latest version of important libraries
+    pip: name={{ item }} extra_args="--upgrade" executable=pip3
+    become: yes
+    with_items:
+      - rpi-rf
