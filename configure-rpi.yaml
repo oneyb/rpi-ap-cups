@@ -7,74 +7,74 @@
   - name: get secrets
     include_vars: file=secrets.yaml
 
-    # for home assistant
-  - name: change password
-    user:
-      name: pi
-      password: "{{  rpipass  }}" 
-      update_password: always
-    become: yes
+  #   # for home assistant
+  # - name: change password
+  #   user:
+  #     name: pi
+  #     password: "{{  rpipass  }}" 
+  #     update_password: always
+  #   become: yes
 
-  - name: stop unnecessary stuff
-    systemd: name="{{ item }}" state=stopped enabled=no
-    become: yes
-    with_items:
-      - hciuart
-      - bluetooth
-      - wpa_supplicant
-      - dhcpcd
-      - alsa-state
+  # - name: stop unnecessary stuff
+  #   systemd: name="{{ item }}" state=stopped enabled=no
+  #   become: yes
+  #   with_items:
+  #     - hciuart
+  #     - bluetooth
+  #     - wpa_supplicant
+  #     - dhcpcd
+  #     - alsa-state
 
-  - name: upgrade system
-    become: yes
-    apt:
-      # upgrade: dist
-      upgrade: full
+  # - name: upgrade system
+  #   become: yes
+  #   apt:
+  #     # upgrade: dist
+  #     upgrade: full
   
-  - name: remove unnecessary packages
-    become: yes
-    apt:
-      state: absent
-      autoremove: yes
-      name: "{{ packages }}"
-    vars:
-      packages:
-        - wolfram-engine
-        - sonic-pi
-        - bluej
-        - greenfoot
+  # - name: remove unnecessary packages
+  #   become: yes
+  #   apt:
+  #     state: absent
+  #     autoremove: yes
+  #     name: "{{ packages }}"
+  #   vars:
+  #     packages:
+  #       - wolfram-engine
+  #       - sonic-pi
+  #       - bluej
+  #       - greenfoot
 
-  - name: install necessary packages
-    become: yes
-    apt: 
-      update_cache: yes
-      cache_valid_time: 86400
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - git
-      - emacs
-      - vim-nox
-      - syncthing
+  # - name: install necessary packages
+  #   become: yes
+  #   apt: 
+  #     update_cache: yes
+  #     cache_valid_time: 86400
+  #     name: "{{ packages }}"
+  #   vars:
+  #     packages:
+  #     - git
+  #     - emacs
+  #     - vim-nox
+  #     - syncthing
 
-  - name: start syncthing
-    systemd: name=syncthing state=restarted daemon_reload=yes enabled=yes scope=user
+  # - name: start syncthing
+  #   systemd: name=syncthing state=restarted daemon_reload=yes enabled=yes scope=user
 
-  - name: run stuff
-    command: "{{ item }}"
-    become: yes
-    with_items:
-      - "timedatectl set-timezone {{ timezone }}"
+  # - name: run stuff
+  #   command: "{{ item }}"
+  #   become: yes
+  #   with_items:
+  #     - "timedatectl set-timezone {{ timezone }}"
 
-  # - name: get spacemacs
-  #   git:
-  #     # repo: ssh://git@github.com:oneyb/config.git
-  #     repo: https://github.com/syl20bnr/spacemacs 
-  #     dest: "{{ ansible_user_home }}/.emacs.d/"
-  #     update: yes
+  # # - name: get spacemacs
+  # #   git:
+  # #     # repo: ssh://git@github.com:oneyb/config.git
+  # #     repo: https://github.com/syl20bnr/spacemacs 
+  # #     dest: "{{ ansible_user_home }}/.emacs.d/"
+  # #     update: yes
 
-  # - name: install spacemacs packages
-  #   command: "emacs --daemon | yes"
+  # # - name: install spacemacs packages
+  # #   command: "emacs --daemon | yes"
 
   - name: get config
     git:
@@ -86,7 +86,7 @@
 
   - name: install config
     copy: 
-      file: "{{ ansible_env.HOME }}/documents/config/.saveme-spacemacs"
+      src: "{{ ansible_env.HOME }}/documents/config/.saveme-spacemacs"
       dest: "{{ ansible_env.HOME }}/.emacs"
       remote_src: yes
 
@@ -101,19 +101,12 @@
       path: "{{ ansible_env.HOME }}/bin"
       state: directory
 
-    
-  # - name: install vim-plug NOW managed from VIM
-  #   get_url:
-  #     url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  #     dest: "{{ ansible_env.HOME }}/.vim/autoload/plug.vim"
-  # - name: install vim plug-ins
-  #   command: vim +PlugInstall +qall
-
   - name: add basic command line control
     lineinfile: dest="{{ item.dest }}" line="{{ item.line }}"
     with_items:
       - { dest: "{{ ansible_env.HOME }}/.bashrc", line: "set -o vi" }
       - { dest: "{{ ansible_env.HOME }}/.bashrc", line: "alias ll='ls -al'" }
+      - { dest: "{{ ansible_env.HOME }}/.bashrc", line: "alias e='emacs -Q -l ~/.emacs'" }
 
 
   # - name: set uart according to 'https://hallard.me/enable-serial-port-on-raspberry-pi/'
