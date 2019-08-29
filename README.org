@@ -1,6 +1,13 @@
 * Description
-A wireless access point, printing server, and home assistant running on a raspberry pi, configured with ansible.
+A wireless access point, printing server, syncthing server, and home assistant running on a
+raspberry pi, configured with ansible.
 
+* Prerequisites
+Your raspberry pi needs to have 
+  - the guessable network name enabled
+  - SSHD enabled
+  
+*Please see the =raspi-config= command* for this.
 * Usage
   1. Copy public ssh key to host
   2. create =config.yaml= [[file:config.yaml][file]]

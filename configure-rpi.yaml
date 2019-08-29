@@ -1,23 +1,29 @@
 ---
 - hosts: all
   # run this: ansible-playbook -i raspberrypi.local, -u pi configure-rpi.yaml -e new_hostname=barrybig -e domain="snb-home"
+  # configure your local raspi server with the basics
 
   tasks:
+  - name: get secrets
+    include_vars: file=secrets.yaml
 
     # for home assistant
   - name: change password
     user:
       name: pi
-      password: $6$/5ndW1SIsXFJCHZ6$xa1uq6z3EJTvAWxvWTijTx.QIF8kjljdZVycFDpj7y5sw5zvRigUM74rsyGyx088r9Ib9lB.4R8p/xmuWrcZP0
+      password: "{{  rpipass  }}" 
       update_password: always
     become: yes
 
-  - name: stop bluetooth stuff
-    systemd: name={{ item }} state=stopped enabled=no
+  - name: stop unnecessary stuff
+    systemd: name="{{ item }}" state=stopped enabled=no
     become: yes
     with_items:
       - hciuart
       - bluetooth
+      - wpa_supplicant
+      - dhcpcd
+      - alsa-state
 
   - name: upgrade system
     become: yes
@@ -28,45 +34,64 @@
   - name: remove unnecessary packages
     become: yes
     apt:
-      name: "{{ item }}"
       state: absent
       autoremove: yes
-    with_items:
-      - wolfram-engine
-      - sonic-pi
-      - bluej
-      - greenfoot
+      name: "{{ packages }}"
+    vars:
+      packages:
+        - wolfram-engine
+        - sonic-pi
+        - bluej
+        - greenfoot
 
   - name: install necessary packages
-    apt: pkg={{ item }} update_cache=yes cache_valid_time=86400
     become: yes
-    with_items:
+    apt: 
+      update_cache: yes
+      cache_valid_time: 86400
+      name: "{{ packages }}"
+    vars:
+      packages:
       - git
-      - emacs25
+      - emacs
       - vim-nox
+      - syncthing
+
+  - name: start syncthing
+    systemd: name=syncthing state=restarted daemon_reload=yes enabled=yes scope=user
 
   - name: run stuff
-    command: {{ item }}
+    command: "{{ item }}"
     become: yes
     with_items:
       - "timedatectl set-timezone {{ timezone }}"
 
-  - name: get spacemacs
-    git:
-      # repo: ssh://git@github.com:oneyb/config.git
-      repo: https://github.com/syl20bnr/spacemacs 
-      dest: "{{ ansible_user_home }}/.emacs.d/"
-      update: yes
-
-  - name: install spacemacs packages
-    command: "emacs --daemon | yes"
-
-  # - name: get config
+  # - name: get spacemacs
   #   git:
   #     # repo: ssh://git@github.com:oneyb/config.git
-  #     repo: https://github.com/oneyb/config.git
-  #     dest: documents/config
+  #     repo: https://github.com/syl20bnr/spacemacs 
+  #     dest: "{{ ansible_user_home }}/.emacs.d/"
   #     update: yes
+
+  # - name: install spacemacs packages
+  #   command: "emacs --daemon | yes"
+
+  - name: get config
+    git:
+      # repo: ssh://git@github.com:oneyb/config.git
+      repo: https://github.com/oneyb/config.git
+      dest: "{{ ansible_env.HOME }}/documents/config"
+      update: yes
+      force: yes
+
+  - name: install config
+    copy: 
+      file: "{{ ansible_env.HOME }}/documents/config/.saveme-spacemacs"
+      dest: "{{ ansible_env.HOME }}/.emacs"
+      remote_src: yes
+
+  - name: install (spac)emacs packages
+    command: "emacs | yes"
 
   # - name: install config
   #   command: bash documents/config/.copy-config.sh in

@@ -9,9 +9,6 @@ secrets.yaml
 hosts
 sha256sum
 home-assistant-ansible/
-homeassistant/secrets.yaml
-homeassistant/home-assistant*
-homeassistant/.HA_VERSION
-homeassistant/.uuid
+homeassistant/
 home-assistant.github.io/
 patches
