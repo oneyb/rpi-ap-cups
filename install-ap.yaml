@@ -1,34 +1,27 @@
 ---
 - hosts: all
   vars:
-    backup_dir: ~/insectplus/rpi-ap-cups/backup-preinstall
-    template_dir: ~/insectplus/rpi-ap-cups/templates
+    backup_dir: {{ playbook_dir }}/backup-preinstall
+    template_dir: {{ playbook_dir }}/templates
   tasks:
   - name: get secrets
     include_vars: file=secrets.yaml
     # include_vars: file=config.yaml
   - name: install necessary packages
-    apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
-    become: yes
-    with_items:
-      - hostapd
-      - dnsmasq
-      - cups
-      - udhcpd
-      - avahi-daemon
-      - python-cups
-      - python3-dev
-      - libsnmp-dev
-      - snmp
-      - libsane-dev
-      - libcups2-dev
-      - cups-bsd
-      - libtool
-      - libtool-bin
-      - avahi-utils
-      - hplip
-      - avahi-discover
-      - python3-pip
+    apt: 
+      update_cache: yes
+      cache_valid_time: 86400
+      name: "{{ packages }}"
+    vars:
+      packages:
+        - hostapd
+        - dnsmasq
+        - udhcpd
+        - libtool
+        - libtool-bin
+        - python3-pip
+        - libsnmp-dev
+        - snmp
   # - name: restore wifi config files
   #   copy: src={{ backup_dir }}/{{ item | basename }} dest={{ item }} owner=root mode=0600
   #   become: yes
@@ -108,8 +101,3 @@
   #     - debug:
   #       msg: 'I caught an error'
 
-  - name: install latest version of important libraries
-    pip: name={{ item }} extra_args="--upgrade" executable=pip3
-    become: yes
-    with_items:
-      - rpi-rf

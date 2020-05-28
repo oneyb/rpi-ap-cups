@@ -5,7 +5,7 @@
   br_ipv4address: 192.168.0.10
   ssid: cool_network_name
   # psk: "strongpassword09789087..;.;.,.;.,"
-  # or better yet: wpa_passphrase cool_network_name "strongpassword09789087..;.;.,.;.,"
+  # or better yet, run: $ wpa_passphrase cool_network_name "strongpassword09789087..;.;.,.;.,"
   psk: 259ab8b472c55dab6e53ffed5de0bb3736ee21b7993f5962c1d81552d23b7058
   timezone: 'Europe/Zurich'
 

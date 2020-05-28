@@ -1,0 +1,127 @@
+---  # run: ansible-playbook -i hassbian.local, -u pi install-cups.yaml
+- hosts: all
+  vars:
+    backup_dir: ~/github/rpi-ap-cups/backup-preinstall
+    template_dir: ~/github/rpi-ap-cups/templates
+  tasks:
+  # - name: get secrets
+  #   include_vars: file=secrets.yaml
+    # include_vars: file=config.yaml
+  - name: install necessary packages
+    apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
+    become: yes
+    with_items:
+      - cups
+      - udhcpd
+      - avahi-daemon
+      - python-cups
+      - python3-dev
+      - libsnmp-dev
+      - snmp
+      - libsane-dev
+      - libcups2-dev
+      # - cups-bsd
+      - libtool
+      - libtool-bin
+      - avahi-utils
+      - hplip
+      - avahi-discover
+      # - python3-pip
+      - samba
+
+  # - name: restore wifi config files
+  #   copy: src={{ backup_dir }}/{{ item | basename }} dest={{ item }} owner=root mode=0600
+  #   become: yes
+  #   become_method: sudo
+  # - name: fill and copy wifi config files
+  #   template: 
+  #     src: '{{ template_dir }}/{{ item | basename }}' 
+  #     dest: '{{ item }}' 
+  #     owner: root 
+  #     mode: 0600
+  #     backup: yes
+  #   become: yes
+  #   with_items:
+  #     - /etc/hostapd/hostapd.conf
+  #     - /etc/default/hostapd
+  #     - /etc/sysctl.conf
+  #     - /etc/dnsmasq.conf
+  #     - /etc/network/interfaces
+  #     - /etc/udhcpd.conf
+  #     # - /etc/default/udhcpd
+  #     - /etc/iptables.ipv4.nat
+  #     - /etc/cups/cupsd.conf
+  - name: set up cups for remote connections
+    command: cupsctl --remote-any
+    become: yes
+
+  - name: change samba config
+    become: yes
+    replace:
+      path: /etc/samba/smb.conf
+      regexp: '\[printers\]\n   comment = All Printers\n   browseable = no\n   path = /var/spool/samba\n   printable = yes\n   guest ok = no'
+      replace: '[printers]\n   comment = All Printers\n   browseable = no\n   path = /var/spool/samba\n   printable = yes\n   guest ok = yes'
+      backup: yes
+
+  - name: add to lpadmin
+    become: yes
+    user:
+      name: pi
+      groups: lpadmin
+      create_home: false
+      append: yes
+
+
+
+  - name: (re)start necessary services
+    systemd: name={{ item }} state=restarted daemon_reload=yes enabled=yes no_block=yes
+    become: yes
+    with_items:
+      # - udhcpd
+      # - hostapd
+      # - dnsmasq
+      - avahi-daemon
+      - cups
+      - networking
+    ignore_errors: true
+    
+
+  - name: waiting for server to come back after services
+    wait_for_connection:
+
+  - name: disable necessary/blocking services
+    systemd: name={{ item }} state=stopped enabled=no
+    become: yes
+    ignore_errors: true
+    with_items:
+      - NetworkManager
+      # - dhcpcd
+
+  - name: restart server
+    shell: sleep 2 && systemctl reboot
+    async: 1
+    poll: 0
+    become: yes
+    ignore_errors: true
+
+  - name: waiting for server to come back after services
+    wait_for_connection:
+
+  # - name: disable necessary/blocking services with error handling
+  #   block:
+  #     - debug:
+  #       msg: 'I execute normally'
+  #     - systemd: name={{ item }} state=stopped enabled=no
+  #       become: yes
+  #       ignore_errors: yes
+  #       with_items:
+  #         - NetworkManager
+  #   rescue:
+  #     - debug:
+  #       msg: 'I caught an error'
+
+  # - name: install latest version of important libraries
+  #   pip: name={{ item }} extra_args="--upgrade" executable=pip3
+  #   become: yes
+  #   with_items:
+  #     - rpi-rf
