@@ -1,8 +1,8 @@
 ---
 - hosts: all
   vars:
-    backup_dir: {{ playbook_dir }}/backup-preinstall
-    template_dir: {{ playbook_dir }}/templates
+    backup_dir: "{{ playbook_dir }}/backup-preinstall"
+    template_dir: "{{ playbook_dir }}/templates"
   tasks:
   - name: get secrets
     include_vars: file=secrets.yaml
@@ -53,7 +53,6 @@
       - /etc/udhcpd.conf
       # - /etc/default/udhcpd
       - /etc/iptables.ipv4.nat
-      - /etc/cups/cupsd.conf
   - name: (re)start necessary services
     systemd: name={{ item }} state=restarted daemon_reload=yes enabled=yes no_block=yes
     become: yes
@@ -62,7 +61,6 @@
       - hostapd
       - dnsmasq
       - avahi-daemon
-      - cups
       - networking
     ignore_errors: true
     
@@ -75,7 +73,7 @@
     become: yes
     ignore_errors: yes
     with_items:
-      - NetworkManager
+      # - NetworkManager
       - dhcpcd
 
   - name: restart server
