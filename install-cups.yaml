@@ -29,28 +29,28 @@
       # - python3-pip
       - samba
 
-  # - name: restore wifi config files
-  #   copy: src={{ backup_dir }}/{{ item | basename }} dest={{ item }} owner=root mode=0600
-  #   become: yes
-  #   become_method: sudo
-  # - name: fill and copy wifi config files
-  #   template: 
-  #     src: '{{ template_dir }}/{{ item | basename }}' 
-  #     dest: '{{ item }}' 
-  #     owner: root 
-  #     mode: 0600
-  #     backup: yes
-  #   become: yes
-  #   with_items:
-  #     - /etc/hostapd/hostapd.conf
-  #     - /etc/default/hostapd
-  #     - /etc/sysctl.conf
-  #     - /etc/dnsmasq.conf
-  #     - /etc/network/interfaces
-  #     - /etc/udhcpd.conf
-  #     # - /etc/default/udhcpd
-  #     - /etc/iptables.ipv4.nat
-  #     - /etc/cups/cupsd.conf
+  - name: restore wifi config files
+    copy: src={{ backup_dir }}/{{ item | basename }} dest={{ item }} owner=root mode=0600
+    become: yes
+    become_method: sudo
+  - name: fill and copy wifi config files
+    template: 
+      src: '{{ template_dir }}/{{ item | basename }}' 
+      dest: '{{ item }}' 
+      owner: root 
+      mode: 0600
+      backup: yes
+    become: yes
+    with_items:
+      - /etc/hostapd/hostapd.conf
+      - /etc/default/hostapd
+      - /etc/sysctl.conf
+      - /etc/dnsmasq.conf
+      - /etc/network/interfaces
+      - /etc/udhcpd.conf
+      # - /etc/default/udhcpd
+      - /etc/iptables.ipv4.nat
+      - /etc/cups/cupsd.conf
   - name: set up cups for remote connections
     command: cupsctl --remote-any
     become: yes
